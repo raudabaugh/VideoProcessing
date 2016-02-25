@@ -22,7 +22,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     
     var faceDetector = CIDetector(ofType: CIDetectorTypeFace, context: nil,
         options: [
-            CIDetectorAccuracy: CIDetectorAccuracyLow,
+            CIDetectorAccuracy: CIDetectorAccuracyHigh,
             CIDetectorTracking: true
         ])
 
@@ -51,6 +51,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         ]
         let frameProcessingQueue = dispatch_queue_create("frameprocessing", DISPATCH_QUEUE_SERIAL)
         output.setSampleBufferDelegate(self, queue: frameProcessingQueue)
+        output.alwaysDiscardsLateVideoFrames = true
         assert(session.canAddOutput(output))
         session.addOutput(output)
         
@@ -58,12 +59,12 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.frame = view.bounds
         previewLayer.hidden = false
+        previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill // *** ??
         view.layer.addSublayer(previewLayer)
         
         // Processed layer
         processedLayer = CALayer()
         processedLayer.frame = view.bounds
-        processedLayer.backgroundColor = UIColor(colorLiteralRed: 1.0, green: 0.0, blue: 0.0, alpha: 1.0).CGColor
         processedLayer.hidden = true
         view.layer.addSublayer(processedLayer)
         
@@ -123,7 +124,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         CVPixelBufferLockBaseAddress(imageBuffer, 0)
         
         let ciImage = CIImage(CVImageBuffer: imageBuffer)
-        let faces = faceDetector.featuresInImage(CIImage(CVImageBuffer: imageBuffer)) as! [CIFaceFeature]
+        let faces = faceDetector.featuresInImage(ciImage, options: [CIDetectorImageOrientation: 6]) as! [CIFaceFeature] // ****
         
         let width = CVPixelBufferGetWidth(imageBuffer)
         let height = CVPixelBufferGetHeight(imageBuffer)
@@ -134,9 +135,15 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         // Draw the actual faces
         CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
-        CGContextSetLineWidth(context, 2)
+        CGContextSetLineWidth(context, 30)
+        
+        var T = CGAffineTransformIdentity
+        T = CGAffineTransformTranslate(T, 0, +CGFloat(height))
+        T = CGAffineTransformScale(T, 1, -1)
+        
         for face in faces {
-            CGContextStrokeRect(context, face.bounds)
+            let faceRectT = CGRectApplyAffineTransform(face.bounds, T)
+            CGContextStrokeEllipseInRect(context, faceRectT)
         }
         CGContextStrokePath(context)
         
@@ -154,7 +161,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     }
     
     func hackFixOrientation(img: UIImage) -> CGImageRef {
-        let debug = CIImage(CGImage: img.CGImage!).imageByApplyingOrientation(6)
+        let debug = CIImage(CGImage: img.CGImage!).imageByApplyingOrientation(5)
         let context = CIContext()
         let fixedImg = context.createCGImage(debug, fromRect: debug.extent)
         return fixedImg
