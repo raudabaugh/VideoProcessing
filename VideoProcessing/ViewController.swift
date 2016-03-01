@@ -25,6 +25,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             CIDetectorAccuracy: CIDetectorAccuracyHigh,
             CIDetectorTracking: true
         ])
+    
+    private let drawingQueue = dispatch_queue_create("drawing", DISPATCH_QUEUE_SERIAL)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -171,8 +173,10 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         if isProcessing {
             guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 //            processImageBuffer(imageBuffer)
-            detectFace(imageBuffer)
-            frameNo++
+            dispatch_async(drawingQueue) {
+                self.detectFace(imageBuffer)
+                self.frameNo++
+            }
         }
     }
 
