@@ -11,12 +11,16 @@ import AVFoundation
 
 class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     @IBOutlet weak var startButton: UIButton!
+    @IBOutlet weak var faceDetectButton: UIButton!
+    @IBOutlet weak var frontBackCameraButton: UIButton!
     
     var session = AVCaptureSession()
     var previewLayer: AVCaptureVideoPreviewLayer!
     var processedLayer: CALayer!
     
     var isProcessing = false
+    
+    var isFaceDetecting = true
     
     var frameNo = 0
     
@@ -30,21 +34,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo) as! [AVCaptureDevice]
-        
-        let device = devices.filter({ $0.position == .Front }).first
-        
-        let input = try! AVCaptureDeviceInput(device: device)
-        
-        // try! is similar to
-        // do {
-        //   input = AVCaptureDeviceInput(device: device)
-        // } catch {
-        //   assert(false)
-        // }
-        
-        assert(session.canAddInput(input))
-        session.addInput(input)
+        configSessionWithDevicePosition(.Front)
         
         // Output
         let output = AVCaptureVideoDataOutput()
@@ -73,8 +63,34 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         // Button setup
         startButton.layer.cornerRadius = startButton.frame.size.width/2
         view.bringSubviewToFront(startButton)
+        frontBackCameraButton.layer.cornerRadius = frontBackCameraButton.frame.size.width/2
+        view.bringSubviewToFront(frontBackCameraButton)
+        faceDetectButton.layer.cornerRadius = faceDetectButton.frame.size.width/2
+        view.bringSubviewToFront(faceDetectButton)
         
         session.startRunning()
+    }
+    
+    func configSessionWithDevicePosition(position: AVCaptureDevicePosition) {
+        let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo) as! [AVCaptureDevice]
+        
+        let device = devices.filter({ $0.position == position }).first
+        
+        let input = try! AVCaptureDeviceInput(device: device)
+        
+        // try! is similar to
+        // do {
+        //   input = AVCaptureDeviceInput(device: device)
+        // } catch {
+        //   assert(false)
+        // }
+        
+        if let currentInput = session.inputs.first as? AVCaptureDeviceInput {
+            session.removeInput(currentInput)
+        }
+        assert(session.canAddInput(input))
+        session.addInput(input)
+        session.commitConfiguration()
     }
 
     @IBAction func startButtonPressed(sender: AnyObject) {
@@ -87,6 +103,16 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         } else {
             startButton.backgroundColor = UIColor(colorLiteralRed: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
         }
+    }
+    
+    @IBAction func faceDetectButtonPressed(sender: AnyObject) {
+        isFaceDetecting = !isFaceDetecting
+    }
+    
+    @IBAction func frontBackCameraButtonPressed(sender: AnyObject) {
+        guard let currentInput = session.inputs.first as? AVCaptureDeviceInput else { return }
+        let newPosition = currentInput.device.position == .Front ? AVCaptureDevicePosition.Back : .Front
+        configSessionWithDevicePosition(newPosition)
     }
     
     func processImageBuffer(imageBuffer: CVImageBufferRef) {
@@ -172,11 +198,14 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
         if isProcessing {
             guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-//            processImageBuffer(imageBuffer)
-            dispatch_async(drawingQueue) {
-                self.detectFace(imageBuffer)
-                self.frameNo++
+            if isFaceDetecting {
+                dispatch_async(drawingQueue) {
+                    self.detectFace(imageBuffer)
+                }
+            } else {
+                processImageBuffer(imageBuffer)
             }
+            frameNo++
         }
     }
 

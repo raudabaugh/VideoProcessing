@@ -12,6 +12,7 @@
 		224D8DC61C7690E70000D493 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 224D8DC41C7690E70000D493 /* Main.storyboard */; };
 		224D8DC81C7690E70000D493 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 224D8DC71C7690E70000D493 /* Assets.xcassets */; };
 		224D8DCB1C7690E70000D493 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 224D8DC91C7690E70000D493 /* LaunchScreen.storyboard */; };
+		22690B831C860159006DCF3B /* FontAwesome.otf in Resources */ = {isa = PBXBuildFile; fileRef = 22690B811C86013D006DCF3B /* FontAwesome.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		224D8DC71C7690E70000D493 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		224D8DCA1C7690E70000D493 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		224D8DCC1C7690E70000D493 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		22690B811C86013D006DCF3B /* FontAwesome.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome.otf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 		224D8DBF1C7690E70000D493 /* VideoProcessing */ = {
 			isa = PBXGroup;
 			children = (
+				22690B821C860141006DCF3B /* Fonts */,
 				224D8DC01C7690E70000D493 /* AppDelegate.swift */,
 				224D8DC21C7690E70000D493 /* ViewController.swift */,
 				224D8DC41C7690E70000D493 /* Main.storyboard */,
@@ -62,6 +65,14 @@
 				224D8DCC1C7690E70000D493 /* Info.plist */,
 			);
 			path = VideoProcessing;
+			sourceTree = "<group>";
+		};
+		22690B821C860141006DCF3B /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				22690B811C86013D006DCF3B /* FontAwesome.otf */,
+			);
+			name = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,6 +136,7 @@
 			files = (
 				224D8DCB1C7690E70000D493 /* LaunchScreen.storyboard in Resources */,
 				224D8DC81C7690E70000D493 /* Assets.xcassets in Resources */,
+				22690B831C860159006DCF3B /* FontAwesome.otf in Resources */,
 				224D8DC61C7690E70000D493 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -293,6 +305,7 @@
 				224D8DD11C7690E70000D493 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

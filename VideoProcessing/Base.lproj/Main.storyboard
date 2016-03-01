@@ -4,7 +4,14 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <mutableArray key="FontAwesome.otf">
+            <string>FontAwesome</string>
+            <string>FontAwesome</string>
+        </mutableArray>
+    </customFonts>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -32,10 +39,49 @@
                                     <action selector="startButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4Ud-jB-3Xr"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H6c-nG-6FE">
+                                <rect key="frame" x="20" y="28" width="50" height="50"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="H6c-nG-6FE" secondAttribute="height" multiplier="1:1" id="35W-up-o2n"/>
+                                    <constraint firstAttribute="width" constant="50" id="jc0-Lh-Ckj"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="FontAwesome" family="FontAwesome" pointSize="15"/>
+                                <state key="normal" title="">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleShadowColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="faceDetectButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="rUq-XW-9wf"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ELV-Bl-ekx">
+                                <rect key="frame" x="530" y="28" width="50" height="50"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="ELV-Bl-ekx" secondAttribute="height" multiplier="1:1" id="3be-0b-kpp"/>
+                                    <constraint firstAttribute="width" constant="50" id="AJr-Xe-SlX"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="FontAwesome" family="FontAwesome" pointSize="15"/>
+                                <state key="normal" title="">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleShadowColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="frontBackCameraButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="eoV-ID-SGL"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="ELV-Bl-ekx" firstAttribute="width" secondItem="ELV-Bl-ekx" secondAttribute="height" multiplier="1:1" id="2DC-ky-eKw"/>
+                            <constraint firstItem="ELV-Bl-ekx" firstAttribute="width" secondItem="ELV-Bl-ekx" secondAttribute="height" multiplier="1:1" id="MNj-jZ-BiY"/>
+                            <constraint firstAttribute="leadingMargin" secondItem="H6c-nG-6FE" secondAttribute="leading" id="h5z-XB-Fae"/>
+                            <constraint firstItem="H6c-nG-6FE" firstAttribute="width" secondItem="H6c-nG-6FE" secondAttribute="height" multiplier="1:1" id="hcG-LN-8np"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ELV-Bl-ekx" secondAttribute="trailing" id="mSm-B9-BxF"/>
+                            <constraint firstItem="ELV-Bl-ekx" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="nS7-aI-EM6"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="ezV-1Q-0di" secondAttribute="bottom" constant="8" symbolic="YES" id="upJ-K7-bII"/>
+                            <constraint firstItem="H6c-nG-6FE" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="vbN-PQ-8kE"/>
                             <constraint firstItem="ezV-1Q-0di" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="yG1-z8-j5r"/>
                             <constraint firstItem="ezV-1Q-0di" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="472" id="yqY-oB-kip"/>
                         </constraints>
@@ -46,6 +92,8 @@
                         </variation>
                     </view>
                     <connections>
+                        <outlet property="faceDetectButton" destination="H6c-nG-6FE" id="Du7-2T-kFC"/>
+                        <outlet property="frontBackCameraButton" destination="ELV-Bl-ekx" id="Ma3-vd-WB3"/>
                         <outlet property="startButton" destination="ezV-1Q-0di" id="TBZ-17-Cg3"/>
                     </connections>
                 </viewController>
