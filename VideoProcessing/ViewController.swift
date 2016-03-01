@@ -8,8 +8,9 @@
 
 import UIKit
 import AVFoundation
+import Photos
 
-class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureFileOutputRecordingDelegate {
     @IBOutlet weak var startButton: UIButton!
     @IBOutlet weak var faceDetectButton: UIButton!
     @IBOutlet weak var frontBackCameraButton: UIButton!
@@ -17,6 +18,10 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     var session = AVCaptureSession()
     var previewLayer: AVCaptureVideoPreviewLayer!
     var processedLayer: CALayer!
+    var assetWriter: AVAssetWriter!
+    var assetWriterInput: AVAssetWriterInput!
+    
+    let output = AVCaptureVideoDataOutput()
     
     var isProcessing = false
     
@@ -31,13 +36,13 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         ])
     
     private let drawingQueue = dispatch_queue_create("drawing", DISPATCH_QUEUE_SERIAL)
+    private let writerQueue = dispatch_queue_create("writer", DISPATCH_QUEUE_SERIAL)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configSessionWithDevicePosition(.Front)
         
         // Output
-        let output = AVCaptureVideoDataOutput()
         output.videoSettings = [
             kCVPixelBufferPixelFormatTypeKey: Int(kCVPixelFormatType_32BGRA)
         ]
@@ -46,6 +51,15 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         output.alwaysDiscardsLateVideoFrames = true
         assert(session.canAddOutput(output))
         session.addOutput(output)
+        
+        let outputFileName = NSProcessInfo.processInfo().globallyUniqueString + ".mov"
+        let outputFilePath = NSURL(fileURLWithPath: NSTemporaryDirectory()).URLByAppendingPathComponent(outputFileName)
+        assetWriter = try! AVAssetWriter(URL: outputFilePath, fileType: AVFileTypeQuickTimeMovie)
+        let videoOutputSettings = output.recommendedVideoSettingsForAssetWriterWithOutputFileType(AVFileTypeQuickTimeMovie) as! [String: AnyObject]
+        assetWriterInput = AVAssetWriterInput(mediaType: AVMediaTypeVideo,
+                                         outputSettings: videoOutputSettings)
+        assert(assetWriter.canAddInput(assetWriterInput))
+        assetWriter.addInput(assetWriterInput)
         
         // Preview layer
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
@@ -71,13 +85,29 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         session.startRunning()
     }
     
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!) {
+    }
+    
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!) {
+        PHPhotoLibrary.requestAuthorization { (status) in
+            if status == .Authorized {
+                PHPhotoLibrary.sharedPhotoLibrary().performChanges({
+                    let options = PHAssetResourceCreationOptions()
+                    options.shouldMoveFile = true
+                    let changeRequest = PHAssetCreationRequest.creationRequestForAsset()
+                    changeRequest.addResourceWithType(.Video, fileURL: outputFileURL, options: options)
+                }, completionHandler: nil)
+            }
+        }
+    }
+
     func configSessionWithDevicePosition(position: AVCaptureDevicePosition) {
         let devices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo) as! [AVCaptureDevice]
-        
+
         let device = devices.filter({ $0.position == position }).first
-        
+
         let input = try! AVCaptureDeviceInput(device: device)
-        
+
         // try! is similar to
         // do {
         //   input = AVCaptureDeviceInput(device: device)
@@ -100,8 +130,15 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
         if isProcessing {
             startButton.backgroundColor = UIColor(colorLiteralRed: 0.0, green: 1.0, blue: 0.0, alpha: 1.0)
+            
+//            output.startRecordingToOutputFileURL(outputFilePath, recordingDelegate: self)
+            assetWriter.startWriting()
+            assetWriter.startSessionAtSourceTime(kCMTimeZero)
         } else {
             startButton.backgroundColor = UIColor(colorLiteralRed: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+//            output.stopRecording()
+            assetWriterInput.markAsFinished()
+            
         }
     }
     
@@ -204,6 +241,9 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                 }
             } else {
                 processImageBuffer(imageBuffer)
+            }
+            assetWriterInput.requestMediaDataWhenReadyOnQueue(writerQueue) {
+                self.assetWriterInput.appendSampleBuffer(sampleBuffer)
             }
             frameNo++
         }
